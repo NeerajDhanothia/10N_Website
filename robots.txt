@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Allow all major AI crawlers explicitly
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://www.10nconsulting.com/sitemap.xml
