@@ -63,6 +63,10 @@ const form    = document.getElementById('contactForm');
 const success = document.getElementById('formSuccess');
 form?.addEventListener('submit', async e => {
   e.preventDefault();
+  // Copy submitter's email into _replyto so Netlify notification is replyable
+  const emailInput = form.querySelector('input[type="email"]');
+  const replyto    = form.querySelector('#replyto');
+  if (emailInput && replyto) replyto.value = emailInput.value;
   const btn = form.querySelector('button[type="submit"]');
   const txt = btn.innerHTML;
   btn.innerHTML = 'Sending…'; btn.disabled = true;

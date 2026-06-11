@@ -374,8 +374,6 @@
           <a href="#" data-contact-href="email" data-contact="email"></a>
         </div>
         <div class="contact-detail">
-          <div class="icon-wrap-sm"><svg class="icon"><use href="#ic-phone"/></svg></div>
-          <a href="#" data-contact-href="phone" data-contact="phone"></a>
         </div>
         <div class="contact-detail">
           <div class="icon-wrap-sm"><svg class="icon"><use href="#ic-map-pin"/></svg></div>
@@ -391,6 +389,8 @@
       <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contactForm" novalidate>
         <input type="hidden" name="form-name" value="contact" />
         <p style="display:none;"><label>Skip: <input name="bot-field" /></label></p>
+        <input type="hidden" name="_replyto" id="replyto" />
+        <input type="hidden" name="_subject" value="New enquiry — 10N Consulting" />
         <div class="form-row">
           <div class="form-group"><label for="fn">First Name *</label><input type="text" id="fn" name="firstName" placeholder="Jane" required autocomplete="given-name" /></div>
           <div class="form-group"><label for="ln">Last Name *</label><input type="text" id="ln" name="lastName" placeholder="Smith" required autocomplete="family-name" /></div>
@@ -433,7 +433,7 @@
       </div>
       <nav class="footer-nav" aria-label="Footer pages"><h5>Pages</h5><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="services.html">Services</a></li><li><a href="#contact">Contact</a></li></ul></nav>
       <nav class="footer-nav" aria-label="Footer services"><h5>Services</h5><ul><li><a href="services.html#operating-model">Operating Model Design</a></li><li><a href="services.html#revops">Revenue Operations</a></li><li><a href="services.html#process">Process Optimisation</a></li><li><a href="services.html#analytics">Operational Analytics</a></li></ul></nav>
-      <nav class="footer-nav" aria-label="Footer connect"><h5>Connect</h5><ul><li><a href="#" data-contact-href="linkedin" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="#" data-contact-href="email" data-contact="email"></a></li><li><a href="#" data-contact-href="phone" data-contact="phone"></a></li></ul></nav>
+      <nav class="footer-nav" aria-label="Footer connect"><h5>Connect</h5><ul><li><a href="#" data-contact-href="linkedin" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="#" data-contact-href="email" data-contact="email"></a></li></ul></nav>
     </div>
     <div class="footer-bottom">
       <p>© 2025 10N Pte Ltd. Registered in Singapore &nbsp;·&nbsp; UEN: 202625463R &nbsp;·&nbsp; All rights reserved.</p>

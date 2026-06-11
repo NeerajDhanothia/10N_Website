@@ -14,8 +14,7 @@ const SITE = {
   // ── CONTACT DETAILS ────────────────────────────────────────────────────────
   //    Update email when switching to company address (e.g. hello@10nconsulting.com)
   contact: {
-    email:        "dhanothia@gmail.com",
-    phone:        "+65 9477 6736",
+    email:        "hello@10nconsulting.com",
     location:     "Singapore · Serving Southeast Asia",
     linkedin:     "https://linkedin.com/in/ndhanothia",
     linkedin_label: "linkedin.com/in/ndhanothia",
