@@ -461,5 +461,54 @@
 
 <script src="content.js"></script>
 <script src="script.js"></script>
+
+<!-- Floating Scorecard CTA -->
+<div id="scorecardFloat" style="
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  z-index:998; display:flex; align-items:center; gap:0;
+  background:var(--teal); border-radius:50px;
+  box-shadow:0 8px 32px rgba(15,107,109,0.35);
+  opacity:0; transition:opacity 0.35s ease, transform 0.35s ease;
+  pointer-events:none; white-space:nowrap; overflow:hidden;
+">
+  <a href="scorecard.html" style="
+    display:flex; align-items:center; gap:10px;
+    padding:14px 20px 14px 22px;
+    color:var(--white); font-family:var(--font);
+    font-size:0.875rem; font-weight:600; text-decoration:none;
+  ">
+    <span style="font-size:1rem;">📊</span>
+    Take the Free Scorecard →
+  </a>
+  <button onclick="dismissFloat()" aria-label="Dismiss" style="
+    background:rgba(0,0,0,0.15); border:none; cursor:pointer;
+    color:rgba(255,255,255,0.8); font-size:0.8rem; font-weight:600;
+    padding:14px 16px; font-family:var(--font); line-height:1;
+    transition:background 0.15s;
+  " onmouseover="this.style.background='rgba(0,0,0,0.25)'"
+     onmouseout="this.style.background='rgba(0,0,0,0.15)'">✕</button>
+</div>
+<script>
+(function(){
+  if(sessionStorage.getItem('scFloatDismissed')) return;
+  var el = document.getElementById('scorecardFloat');
+  var shown = false;
+  window.addEventListener('scroll', function(){
+    if(!shown && window.scrollY > 400){
+      shown = true;
+      el.style.opacity = '1';
+      el.style.transform = 'translateX(-50%) translateY(0)';
+      el.style.pointerEvents = 'auto';
+    }
+  }, { passive: true });
+})();
+function dismissFloat(){
+  var el = document.getElementById('scorecardFloat');
+  el.style.opacity = '0';
+  el.style.transform = 'translateX(-50%) translateY(80px)';
+  el.style.pointerEvents = 'none';
+  sessionStorage.setItem('scFloatDismissed','1');
+}
+</script>
 </body>
 </html>
