@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operations Efficiency Scorecard — 10N Consulting</title>
+  <meta name="description" content="Benchmark your business operations in 5 minutes. Get a free, personalised scorecard across operating model, revenue operations, process efficiency, analytics, and team health." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230F6B6D'/><text y='.85em' font-size='64' font-family='sans-serif' font-weight='900' fill='white'>10</text></svg>" />
+  <style>
+    /* ── Scorecard-specific styles ── */
+    body { background: var(--off-white); }
+
+    .sc-wrap {
+      min-height: 100vh;
+      padding: 96px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Progress bar */
+    .sc-progress-bar-track {
+      position: fixed;
+      top: 68px; left: 0; right: 0;
+      height: 3px;
+      background: var(--grey-200);
+      z-index: 900;
+    }
+    .sc-progress-bar-fill {
+      height: 100%;
+      background: var(--teal);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* Card container */
+    .sc-card {
+      background: var(--white);
+      border: 0.5px solid var(--grey-200);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Intro screen */
+    .sc-intro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal-pale);
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .sc-intro-h1 {
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+    }
+    .sc-intro-lead {
+      font-size: 1.05rem;
+      color: var(--grey-500);
+      line-height: 1.75;
+      margin-bottom: 32px;
+    }
+    .sc-meta-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 20px 0;
+      border-top: 0.5px solid var(--grey-200);
+      border-bottom: 0.5px solid var(--grey-200);
+      margin-bottom: 32px;
+    }
+    .sc-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      color: var(--grey-600);
+    }
+    .sc-meta-icon {
+      width: 32px; height: 32px;
+      background: var(--teal-pale);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .sc-covers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .sc-cover-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--grey-600);
+    }
+    .sc-cover-dot {
+      width: 8px; height: 8px;
+      background: var(--teal);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Section header */
+    .sc-section-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .sc-section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .sc-section-desc {
+      font-size: 0.9rem;
+      color: var(--grey-500);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Questions */
+    .sc-question {
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 0.5px solid var(--grey-100);
+    }
+    .sc-question:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .sc-question-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .sc-question-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--teal);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .sc-scale {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .sc-scale-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 4px;
+      border: 1.5px solid var(--grey-200);
+      border-radius: var(--radius);
+      background: var(--white);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font);
+    }
+    .sc-scale-btn:hover { border-color: var(--teal); background: var(--teal-pale); }
+    .sc-scale-btn.selected { border-color: var(--teal); background: var(--teal); }
+    .sc-scale-num {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--grey-500);
+      line-height: 1;
+    }
+    .sc-scale-btn.selected .sc-scale-num { color: var(--white); }
+    .sc-scale-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--grey-400);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+    }
+    .sc-scale-btn.selected .sc-scale-label { color: rgba(255,255,255,0.8); }
+    .sc-scale-btn:hover .sc-scale-num { color: var(--teal); }
+    .sc-scale-btn:hover .sc-scale-label { color: var(--teal); }
+    .sc-scale-btn.selected:hover .sc-scale-num,
+    .sc-scale-btn.selected:hover .sc-scale-label { color: var(--white); }
+
+    /* Navigation */
+    .sc-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 0.5px solid var(--grey-100);
+    }
+    .sc-back-btn {
+      background: none;
+      border: none;
+      color: var(--grey-400);
+      font-family: var(--font);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+      transition: color 0.15s;
+    }
+    .sc-back-btn:hover { color: var(--navy); }
+    .sc-error {
+      color: #A32D2D;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Email gate */
+    .sc-gate-icon {
+      width: 64px; height: 64px;
+      background: var(--teal-pale);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 24px;
+    }
+    .sc-gate h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--navy);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .sc-gate p {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--grey-500);
+      margin-bottom: 28px;
+    }
+    .sc-gate-preview {
+      background: var(--teal-pale);
+      border: 1px solid var(--teal-light);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .sc-gate-score-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 4px;
+    }
+    .sc-gate-score-num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .sc-gate-score-denom {
+      font-size: 1.2rem;
+      color: var(--grey-400);
+      font-weight: 600;
+    }
+    .sc-gate-score-tier {
+      font-size: 0.8rem;
+      color: var(--teal);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* Results */
+    .sc-results-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .sc-score-circle {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .sc-score-big {
+      font-size: 2.4rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .sc-score-denom {
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+    .sc-tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .sc-results-desc {
+      font-size: 1rem;
+      color: var(--grey-500);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Section bars */
+    .sc-breakdown-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--grey-400);
+      margin-bottom: 20px;
+    }
+    .sc-bar-row {
+      margin-bottom: 16px;
+    }
+    .sc-bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .sc-bar-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .sc-bar-score {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--grey-500);
+    }
+    .sc-bar-track {
+      height: 8px;
+      background: var(--grey-100);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .sc-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s ease;
+      width: 0%;
+    }
+
+    /* Recommendations */
+    .sc-recs-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--grey-400);
+      margin: 32px 0 16px;
+    }
+    .sc-rec-card {
+      background: var(--off-white);
+      border: 0.5px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .sc-rec-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .sc-rec-content h4 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .sc-rec-content p {
+      font-size: 0.8rem;
+      color: var(--grey-500);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* Results CTA */
+    .sc-results-cta {
+      background: var(--navy-deeper);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      margin-top: 28px;
+    }
+    .sc-results-cta h3 {
+      color: var(--white);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .sc-results-cta p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+
+    /* Screens */
+    .sc-screen { display: none; }
+    .sc-screen.active { display: block; }
+
+    /* Util */
+    .w-full { width: 100%; }
+
+    @media (max-width: 600px) {
+      .sc-card { padding: 28px 20px; }
+      .sc-covers-grid { grid-template-columns: 1fr; }
+      .sc-scale { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+      .sc-scale-btn { padding: 8px 2px; }
+      .sc-scale-num { font-size: 1rem; }
+      .sc-scale-label { font-size: 0.55rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo" aria-label="10N Consulting home">
+        <span class="logo-10">10</span><span class="logo-n">N</span>
+        <span class="logo-word">Consulting</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="scorecard.html" class="active">Scorecard</a></li>
+        <li><a href="index.html#contact" class="nav-cta">Get in Touch</a></li>
+      </ul>
+      <div class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <!-- Progress bar -->
+  <div class="sc-progress-bar-track" id="progressTrack" style="display:none;">
+    <div class="sc-progress-bar-fill" id="progressFill"></div>
+  </div>
+
+  <!-- Scorecard App -->
+  <main class="sc-wrap" id="scApp">
+
+    <!-- ── Screen 0: Intro ── -->
+    <div class="sc-card sc-screen active" id="screen-intro">
+      <div class="sc-intro-badge">Free · 5 minutes · Instant results</div>
+      <h1 class="sc-intro-h1">How operationally fit is your business?</h1>
+      <p class="sc-intro-lead">25 targeted questions across 5 operational areas. Get a personalised score, section-by-section breakdown, and specific recommendations — in under 5 minutes.</p>
+
+      <div class="sc-meta-row">
+        <div class="sc-meta-item">
+          <div class="sc-meta-icon">📋</div>
+          <span>25 questions across 5 areas</span>
+        </div>
+        <div class="sc-meta-item">
+          <div class="sc-meta-icon">⏱️</div>
+          <span>Takes under 5 minutes</span>
+        </div>
+        <div class="sc-meta-item">
+          <div class="sc-meta-icon">📊</div>
+          <span>Personalised scorecard + report</span>
+        </div>
+      </div>
+
+      <p style="font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--grey-400); margin-bottom:14px;">What we assess</p>
+      <div class="sc-covers-grid">
+        <div class="sc-cover-item"><div class="sc-cover-dot"></div><span>Operating Model & Structure</span></div>
+        <div class="sc-cover-item"><div class="sc-cover-dot"></div><span>Revenue Operations & CRM</span></div>
+        <div class="sc-cover-item"><div class="sc-cover-dot"></div><span>Process Efficiency</span></div>
+        <div class="sc-cover-item"><div class="sc-cover-dot"></div><span>Analytics & Reporting</span></div>
+        <div class="sc-cover-item"><div class="sc-cover-dot"></div><span>Team & Organisational Health</span></div>
+      </div>
+
+      <button class="btn btn-primary btn-lg w-full" onclick="startScorecard()" style="justify-content:center;">
+        Start the Assessment →
+      </button>
+      <p style="text-align:center; font-size:0.78rem; color:var(--grey-400); margin-top:12px;">No obligation. Your results are private and never shared.</p>
+    </div>
+
+    <!-- ── Screens 1–5: Question sections ── -->
+    <div class="sc-card sc-screen" id="screen-section-0"></div>
+    <div class="sc-card sc-screen" id="screen-section-1"></div>
+    <div class="sc-card sc-screen" id="screen-section-2"></div>
+    <div class="sc-card sc-screen" id="screen-section-3"></div>
+    <div class="sc-card sc-screen" id="screen-section-4"></div>
+
+    <!-- ── Screen 6: Email gate ── -->
+    <div class="sc-card sc-screen sc-gate" id="screen-gate">
+      <div class="sc-gate-icon">📊</div>
+      <h2>Your scorecard is ready.</h2>
+      <p>Enter your name and email to unlock your full results — including your section breakdown and top recommendations.</p>
+      <div class="sc-gate-preview">
+        <div class="sc-gate-score-label">Your overall score</div>
+        <div>
+          <span class="sc-gate-score-num" id="gateScore">—</span>
+          <span class="sc-gate-score-denom">/100</span>
+        </div>
+        <div class="sc-gate-score-tier" id="gateTier"></div>
+      </div>
+      <form id="gateForm" name="scorecard-lead" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="scorecard-lead" />
+        <input type="hidden" name="overall_score" id="hiddenScore" />
+        <input type="hidden" name="section_scores" id="hiddenSectionScores" />
+        <input type="hidden" name="weakest_area" id="hiddenWeakest" />
+        <p style="display:none;"><input name="bot-field" /></p>
+        <div class="form-group">
+          <label for="gateName">Your Name *</label>
+          <input type="text" id="gateName" name="name" placeholder="Jane Smith" required autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="gateEmail">Work Email *</label>
+          <input type="email" id="gateEmail" name="email" placeholder="jane@yourcompany.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="gateCompany">Company</label>
+          <input type="text" id="gateCompany" name="company" placeholder="Your Company Pte Ltd" autocomplete="organization" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-full" style="justify-content:center; margin-top:8px;">
+          View My Full Results →
+        </button>
+        <p style="text-align:center; font-size:0.78rem; color:var(--grey-400); margin-top:12px;">No spam. Unsubscribe any time. We respond to every scorecard within 1 business day.</p>
+      </form>
+    </div>
+
+    <!-- ── Screen 7: Results ── -->
+    <div class="sc-card sc-screen" id="screen-results">
+      <div class="sc-results-header">
+        <div class="sc-score-circle" id="resultsCircle">
+          <div class="sc-score-big" id="resultsBigScore"></div>
+          <div class="sc-score-denom">out of 100</div>
+        </div>
+        <div class="sc-tier-badge" id="resultsTierBadge"></div>
+        <p class="sc-results-desc" id="resultsTierDesc"></p>
+      </div>
+
+      <div style="border-top:0.5px solid var(--grey-200); padding-top:28px;">
+        <div class="sc-breakdown-title">Score by Area</div>
+        <div id="sectionBars"></div>
+      </div>
+
+      <div class="sc-recs-title">Top Recommendations</div>
+      <div id="recommendations"></div>
+
+      <div class="sc-results-cta">
+        <h3>Ready to close the gaps?</h3>
+        <p>Most engagements start with a free 30-minute discovery call. We'll walk through your scorecard results and identify where to focus first.</p>
+        <a href="index.html#contact" class="btn btn-outline-white btn-lg" style="justify-content:center; display:inline-flex;">
+          Book a Free Discovery Call →
+        </a>
+      </div>
+
+      <div style="margin-top:20px; text-align:center;">
+        <button onclick="restartScorecard()" style="background:none; border:none; color:var(--grey-400); font-size:0.8rem; cursor:pointer; font-family:var(--font);">
+          Retake the scorecard
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Netlify form detection (hidden) -->
+  <form name="scorecard-lead" data-netlify="true" style="display:none;">
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="text" name="company" />
+    <input type="hidden" name="overall_score" />
+    <input type="hidden" name="section_scores" />
+    <input type="hidden" name="weakest_area" />
+  </form>
+
+  <script src="script.js"></script>
+  <script>
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const SECTIONS = [
+    {
+      title: "Operating Model & Structure",
+      icon: "⚙️",
+      service: "Operating Model Design & Scaling",
+      desc: "Assess how clearly your business is structured, governed, and run day-to-day.",
+      questions: [
+        "Your business has a documented operating model — defined roles, key processes, and clear ownership at every level.",
+        "Strategic priorities (OKRs or equivalent) are clearly defined, shared with the team, and tracked regularly.",
+        "You have consistent operating rhythms — weekly team standups, monthly reviews, and quarterly planning cycles.",
+        "P&L ownership and budget responsibility are clearly assigned, with regular financial reviews against plan.",
+        "Your core operations could continue running effectively without you for two or more weeks."
+      ],
+      recs: {
+        low:  { title: "Build your operating foundation", body: "Your business is likely running on founder instinct and tribal knowledge. Priority: document your core processes, define roles clearly, and establish a basic operating rhythm before scaling further." },
+        mid:  { title: "Formalise your operating model", body: "You have the basics but they're inconsistent. Focus on standardising your operating cadences and clarifying accountability — especially P&L ownership and team OKRs." },
+        high: { title: "Optimise for scale", body: "Strong foundation. The next step is stress-testing your model against growth — ensuring it compounds efficiency rather than creating complexity as headcount and revenue increase." }
+      }
+    },
+    {
+      title: "Revenue Operations & CRM",
+      icon: "📈",
+      service: "Revenue Operations & CRM",
+      desc: "Assess how predictable, visible, and well-managed your commercial operations are.",
+      questions: [
+        "You use a CRM to track your full sales pipeline, customer data, and account history — and your team uses it consistently.",
+        "You can confidently forecast your revenue 90 days ahead, with less than 15% variance from actual results.",
+        "You have a defined, repeatable customer onboarding process that gets every new customer to value quickly.",
+        "You proactively track customer health, churn risk, and renewal status — rather than reacting when customers flag issues.",
+        "Your sales and customer success handoffs are documented, consistent, and experienced as seamless by the customer."
+      ],
+      recs: {
+        low:  { title: "Build your commercial infrastructure", body: "Revenue is likely unpredictable and customer data is scattered. Start with CRM implementation and a basic onboarding playbook — these two alone will transform your revenue visibility and retention." },
+        mid:  { title: "Close the forecasting and retention gaps", body: "You have tools in place but they're not fully utilised. Focus on improving CRM hygiene, building a churn risk scoring model, and standardising your onboarding handoffs." },
+        high: { title: "Move to proactive revenue management", body: "Your RevOps is solid. The next level is predictive analytics — using pipeline and health data to act on risks before they materialise, not after." }
+      }
+    },
+    {
+      title: "Process Efficiency",
+      icon: "⚡",
+      service: "Process Optimisation",
+      desc: "Assess how systematic, efficient, and repeatable your core operational processes are.",
+      questions: [
+        "Your core business processes are documented, repeatable, and followed consistently by the team — not just known by one or two people.",
+        "You know where your biggest operational bottlenecks are, and you can quantify their cost in time or money.",
+        "You have eliminated or automated the most significant manual steps in your key workflows (billing, reporting, onboarding).",
+        "You have internal SLAs — response times, turnaround targets, escalation paths — and you track performance against them.",
+        "When a process breaks down, your team has a structured method to identify the root cause and prevent recurrence."
+      ],
+      recs: {
+        low:  { title: "Eliminate your biggest process risks", body: "Your operations are dependent on individual knowledge and manual effort. Start by mapping your three most critical processes and identifying the single biggest bottleneck in each. Even small fixes here have disproportionate impact." },
+        mid:  { title: "Systematise and automate", body: "You have processes but they're inconsistent. Prioritise documentation of your core workflows, set internal SLAs, and identify the highest-impact automation opportunities to reduce manual workload." },
+        high: { title: "Move to continuous improvement", body: "Strong process discipline. The next step is establishing a formal continuous improvement programme — regular process reviews, structured root cause analysis, and efficiency metrics tracked over time." }
+      }
+    },
+    {
+      title: "Analytics & Reporting",
+      icon: "📊",
+      service: "Operational Analytics & Reporting",
+      desc: "Assess the quality and accessibility of the data driving your business decisions.",
+      questions: [
+        "You have a defined set of KPIs that leadership reviews on a regular cadence — and these are agreed upon and understood across the team.",
+        "You can access key business metrics in real-time or near-real-time — not through manual spreadsheet exports.",
+        "Your revenue and operational forecasts are consistently within 10% of actual results.",
+        "You produce structured MBR or QBR reports for leadership or investors, based on consistent, reliable data.",
+        "You use data proactively to identify churn risk, pipeline gaps, or operational failures before they become crises."
+      ],
+      recs: {
+        low:  { title: "Build your measurement foundation", body: "Decisions are likely based on instinct rather than data. Start by defining 5–7 core KPIs for your business, then build the simplest possible dashboard to track them. You can't manage what you can't measure." },
+        mid:  { title: "Improve data reliability and access", body: "You have metrics but they're inconsistent or hard to access. Focus on CRM data hygiene, automating your reporting, and building a single source of truth for key metrics." },
+        high: { title: "Move to predictive analytics", body: "Solid data infrastructure. The next level is forward-looking analytics — scenario modelling, predictive churn signals, and pipeline coverage ratios that let you act weeks before problems surface." }
+      }
+    },
+    {
+      title: "Team & Organisational Health",
+      icon: "👥",
+      service: "Change Management & Transformation",
+      desc: "Assess how well your team is structured, aligned, and able to execute through change.",
+      questions: [
+        "Every team member understands how their individual role connects to company goals — and this clarity holds through growth and restructuring.",
+        "You have structured performance management in place — regular 1:1s, clear feedback loops, and development frameworks for your team.",
+        "You can accurately forecast your team's capacity for the next 90 days — including hiring needs, workload distribution, and skill gaps.",
+        "When you have introduced structural or process changes, they have stuck — your team has not reverted to old habits within weeks.",
+        "Your organisational structure is appropriate for your current growth stage and doesn't create unnecessary bottlenecks or silos."
+      ],
+      recs: {
+        low:  { title: "Build team clarity and accountability", body: "Growth without structural clarity creates attrition and inefficiency. Start with role clarity frameworks, introduce regular 1:1 cadences, and build a simple OKR structure so every team member knows what success looks like for them." },
+        mid:  { title: "Strengthen performance and change management", body: "You have a capable team but the operating structures around them are inconsistent. Focus on performance management consistency and capacity planning — two areas that compound as you scale." },
+        high: { title: "Optimise for scale and resilience", body: "Strong team operations. Focus on succession planning, cross-functional capability building, and ensuring your org structure can absorb your next stage of growth without losing cohesion." }
+      }
+    }
+  ];
+
+  const SCALE_LABELS = ["Not yet", "Early stages", "In progress", "Mostly there", "Fully in place"];
+
+  const TIERS = [
+    { min: 0,  max: 39,  label: "Foundation Stage",  color: "#A32D2D", bg: "#FCEBEB", desc: "Your operations are a significant constraint on growth. There are foundational gaps across multiple areas that need to be addressed before you can scale sustainably. The good news: the biggest improvements come from the earliest fixes." },
+    { min: 40, max: 59,  label: "Developing",         color: "#854F0B", bg: "#FAEEDA", desc: "You have the basics in place but inconsistency and gaps are creating risk as you grow. You're likely feeling the strain in 2–3 specific areas. Targeted improvements in those areas will unlock significant leverage." },
+    { min: 60, max: 79,  label: "Functional",          color: "#0F6B6D", bg: "#EEF7F7", desc: "Good operational foundations with specific areas to sharpen. You can scale from here, but improving your weaker areas now will prevent them becoming expensive problems at higher revenue and headcount." },
+    { min: 80, max: 100, label: "Advanced",            color: "#3B6D11", bg: "#EAF3DE", desc: "Strong operational infrastructure. You're operating above the average for your stage. Focus now shifts to optimisation, continuous improvement, and building the systems that scale to your next milestone." }
+  ];
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let currentScreen = 'intro';
+  let answers = Array(25).fill(0); // 0 = unanswered
+  let sectionScores = Array(5).fill(0);
+  let totalScore = 0;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function getTier(score) {
+    return TIERS.find(t => score >= t.min && score <= t.max) || TIERS[0];
+  }
+
+  function calcScores() {
+    sectionScores = SECTIONS.map((_, si) => {
+      const sectionAnswers = answers.slice(si * 5, si * 5 + 5);
+      const raw = sectionAnswers.reduce((a, b) => a + b, 0);
+      return Math.round((raw / 25) * 20); // out of 20
+    });
+    totalScore = Math.round(sectionScores.reduce((a, b) => a + b, 0));
+    return totalScore;
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.sc-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(sectionIndex) {
+    const track = document.getElementById('progressTrack');
+    const fill  = document.getElementById('progressFill');
+    if (sectionIndex < 0) { track.style.display = 'none'; return; }
+    track.style.display = 'block';
+    const pct = Math.round(((sectionIndex) / 5) * 100);
+    fill.style.width = pct + '%';
+  }
+
+  // ── Build section screens ─────────────────────────────────────────────────
+  function buildSectionScreen(si) {
+    const section = SECTIONS[si];
+    const globalOffset = si * 5;
+
+    let questionsHTML = section.questions.map((q, qi) => {
+      const gi = globalOffset + qi; // global question index
+      return `
+        <div class="sc-question" id="qblock-${gi}">
+          <span class="sc-question-num">Q${gi + 1}</span>
+          <div class="sc-question-text">${q}</div>
+          <div class="sc-scale" role="group" aria-label="Question ${gi + 1} rating">
+            ${[1,2,3,4,5].map(v => `
+              <button class="sc-scale-btn${answers[gi] === v ? ' selected' : ''}"
+                      onclick="selectAnswer(${gi}, ${v}, this)"
+                      aria-label="Score ${v} — ${SCALE_LABELS[v-1]}"
+                      type="button">
+                <span class="sc-scale-num">${v}</span>
+                <span class="sc-scale-label">${SCALE_LABELS[v-1]}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById(`screen-section-${si}`).innerHTML = `
+      <div class="sc-section-num">Section ${si + 1} of 5</div>
+      <div class="sc-section-title">${section.icon} ${section.title}</div>
+      <div class="sc-section-desc">${section.desc}</div>
+      ${questionsHTML}
+      <p class="sc-error" id="error-${si}">Please answer all 5 questions before continuing.</p>
+      <div class="sc-nav-row">
+        <button class="sc-back-btn" onclick="goBack(${si})" type="button">← Back</button>
+        <button class="btn btn-primary" onclick="goNext(${si})" type="button">
+          ${si < 4 ? 'Next Section →' : 'See My Results →'}
+        </button>
+      </div>`;
+  }
+
+  // ── User interactions ─────────────────────────────────────────────────────
+  function selectAnswer(globalIndex, value, btn) {
+    answers[globalIndex] = value;
+    // Deselect siblings
+    const siblings = btn.closest('.sc-scale').querySelectorAll('.sc-scale-btn');
+    siblings.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function startScorecard() {
+    for (let i = 0; i < 5; i++) buildSectionScreen(i);
+    updateProgress(0);
+    showScreen('screen-section-0');
+    currentScreen = 'section-0';
+  }
+
+  function goNext(si) {
+    const sectionAnswers = answers.slice(si * 5, si * 5 + 5);
+    const unanswered = sectionAnswers.indexOf(0);
+    const err = document.getElementById(`error-${si}`);
+
+    if (unanswered !== -1) {
+      err.style.display = 'block';
+      const block = document.getElementById(`qblock-${si * 5 + unanswered}`);
+      block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    err.style.display = 'none';
+
+    if (si < 4) {
+      updateProgress(si + 1);
+      showScreen(`screen-section-${si + 1}`);
+    } else {
+      // All sections done — show gate
+      calcScores();
+      const tier = getTier(totalScore);
+      document.getElementById('gateScore').textContent = totalScore;
+      document.getElementById('gateTier').textContent = tier.label;
+      document.getElementById('hiddenScore').value = totalScore;
+      document.getElementById('hiddenSectionScores').value = SECTIONS.map((s, i) => `${s.title}: ${sectionScores[i]}/20`).join(' | ');
+      const weakestIdx = sectionScores.indexOf(Math.min(...sectionScores));
+      document.getElementById('hiddenWeakest').value = SECTIONS[weakestIdx].title;
+      updateProgress(5);
+      showScreen('screen-gate');
+    }
+  }
+
+  function goBack(si) {
+    if (si === 0) {
+      updateProgress(-1);
+      showScreen('screen-intro');
+    } else {
+      updateProgress(si - 1);
+      showScreen(`screen-section-${si - 1}`);
+    }
+  }
+
+  function restartScorecard() {
+    answers = Array(25).fill(0);
+    sectionScores = Array(5).fill(0);
+    totalScore = 0;
+    updateProgress(-1);
+    showScreen('screen-intro');
+  }
+
+  // ── Gate form submission ──────────────────────────────────────────────────
+  document.getElementById('gateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = 'Loading your results…';
+    btn.disabled = true;
+
+    // Submit to Netlify
+    try {
+      const fd = new FormData(e.target);
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(fd).toString()
+      });
+    } catch (_) {}
+
+    showResults();
+  });
+
+  // ── Build results screen ──────────────────────────────────────────────────
+  function showResults() {
+    const tier = getTier(totalScore);
+
+    // Score circle
+    const circle = document.getElementById('resultsCircle');
+    circle.style.background = tier.bg;
+    circle.style.border = `3px solid ${tier.color}`;
+    document.getElementById('resultsBigScore').textContent = totalScore;
+    document.getElementById('resultsBigScore').style.color = tier.color;
+
+    // Tier badge
+    const badge = document.getElementById('resultsTierBadge');
+    badge.textContent = tier.label;
+    badge.style.background = tier.bg;
+    badge.style.color = tier.color;
+    badge.style.border = `1px solid ${tier.color}40`;
+
+    document.getElementById('resultsTierDesc').textContent = tier.desc;
+
+    // Section bars
+    const barColors = ['#A32D2D', '#854F0B', '#0F6B6D', '#3B6D11'];
+    function barColor(score) {
+      if (score < 10) return barColors[0];
+      if (score < 14) return barColors[1];
+      if (score < 17) return barColors[2];
+      return barColors[3];
+    }
+
+    const barsHTML = SECTIONS.map((s, i) => `
+      <div class="sc-bar-row">
+        <div class="sc-bar-label-row">
+          <span class="sc-bar-label">${s.title}</span>
+          <span class="sc-bar-score" style="color:${barColor(sectionScores[i])}">${sectionScores[i]}/20</span>
+        </div>
+        <div class="sc-bar-track">
+          <div class="sc-bar-fill" id="bar-${i}" style="background:${barColor(sectionScores[i])}; width:0%"></div>
+        </div>
+      </div>`).join('');
+    document.getElementById('sectionBars').innerHTML = barsHTML;
+
+    // Animate bars after render
+    setTimeout(() => {
+      SECTIONS.forEach((_, i) => {
+        const bar = document.getElementById(`bar-${i}`);
+        if (bar) bar.style.width = `${(sectionScores[i] / 20) * 100}%`;
+      });
+    }, 100);
+
+    // Top 3 recommendations (lowest scoring sections first)
+    const ranked = [...sectionScores.map((s, i) => ({ i, s }))].sort((a, b) => a.s - b.s);
+    const top3 = ranked.slice(0, 3);
+
+    const recColors = ['#FCEBEB', '#FAEEDA', '#EEF7F7'];
+    const recIconColors = ['#A32D2D', '#854F0B', '#0F6B6D'];
+    const recIcons = ['🎯', '📋', '💡'];
+    const priorityLabels = ['Priority 1', 'Priority 2', 'Priority 3'];
+
+    const recsHTML = top3.map(({ i, s }, rank) => {
+      const section = SECTIONS[i];
+      const recKey = s < 10 ? 'low' : s < 15 ? 'mid' : 'high';
+      const rec = section.recs[recKey];
+      return `
+        <div class="sc-rec-card">
+          <div class="sc-rec-icon" style="background:${recColors[rank]};">
+            <span style="font-size:1rem;">${recIcons[rank]}</span>
+          </div>
+          <div class="sc-rec-content">
+            <h4 style="color:${recIconColors[rank]}; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">${priorityLabels[rank]} — ${section.title}</h4>
+            <h4>${rec.title}</h4>
+            <p>${rec.body}</p>
+          </div>
+        </div>`;
+    }).join('');
+    document.getElementById('recommendations').innerHTML = recsHTML;
+
+    updateProgress(5);
+    showScreen('screen-results');
+  }
+  </script>
+</body>
+</html>
